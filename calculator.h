@@ -22,5 +22,6 @@ private:
 private slots:
     void numPressed();
     void clearPressed();
+    void decimalPressed();
 };
 #endif // CALCULATOR_H
