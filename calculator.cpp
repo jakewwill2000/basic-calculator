@@ -2,7 +2,7 @@
 #include "ui_calculator.h"
 
 // Used to represent the current value being displayed
-double currValue = 0.0;
+QString currValue = "";
 
 // Indicator variable denoting whether currValue is a decimal. We need this
 // because adding new digits is handled differently before and after the
@@ -51,30 +51,26 @@ Calculator::~Calculator()
  * we just set the display number to the number that is pressed.
  */
 void Calculator::numPressed() {
-    QPushButton *button = (QPushButton *) sender();
-    double newValue = button->text().toDouble();
-
-    if (newValue == 0) {
-        currValue = newValue;
-    } else if (afterDecimal == false) {
-        currValue = currValue * 10 + newValue;
-    } else {
-        digit -= 1;
-        currValue = currValue + newValue * pow(10, digit);
+    // We want to constrain numbers to 16 digits for now
+    if (currValue.length() >= 16) {
+        return;
     }
 
-    ui->display->setText(QString::number(currValue));
+    QPushButton *button = (QPushButton *) sender();
+    QString newValue = button->text();
+
+    currValue += newValue;
+
+    ui->display->setText(currValue);
 }
 
 /*
  * When the clear button is pressed, set the displayed value to 0.0
  */
 void Calculator::clearPressed() {
-    currValue = 0.0;
-    afterDecimal = false;
-    digit = 0;
+    currValue = "";
 
-    ui->display->setText(QString::number(currValue));
+    ui->display->setText(currValue);
 }
 
 /*
@@ -83,5 +79,5 @@ void Calculator::clearPressed() {
  * accordingly.
  */
 void Calculator::decimalPressed() {
-    afterDecimal = true;
+    currValue += ".";
 }

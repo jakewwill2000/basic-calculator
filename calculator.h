@@ -2,6 +2,7 @@
 #define CALCULATOR_H
 
 #include <QMainWindow>
+#include <string.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Calculator; }
