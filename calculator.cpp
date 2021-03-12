@@ -4,14 +4,9 @@
 // Used to represent the current value being displayed
 QString currValue = "";
 
-// Indicator variable denoting whether currValue is a decimal. We need this
-// because adding new digits is handled differently before and after the
-// decimal point.
-bool afterDecimal = false;
-
-// Represents the current digit (after the decimal point). This is used when
-// adding new digits onto the current value displayed.
-int digit = 0;
+// We use these values to constrain the maximum length of a number
+const size_t MAX_NUM_LENGTH = 16;
+size_t currNumLen = 0;
 
 Calculator::Calculator(QWidget *parent)
     : QMainWindow(parent)
@@ -38,6 +33,18 @@ Calculator::Calculator(QWidget *parent)
     // Connect the dot button to the decimalPressed() slot
     QPushButton *decimalButton = Calculator::findChild<QPushButton *>("buttonDot");
     connect(decimalButton, SIGNAL(released()), this, SLOT(decimalPressed()));
+
+    // Connect the operator buttons to the operatorPressed() slot
+    QString buttonNames[4] = {"buttonAdd", "buttonSub", "buttonDiv", "buttonMul"};
+
+    for (QString name: buttonNames) {
+        QPushButton *newButton = Calculator::findChild<QPushButton *>(name);
+        connect(newButton, SIGNAL(released()), this, SLOT(operatorPressed()));
+    }
+
+    // Connect the equal button to the equalsPressed() slot
+    QPushButton *equalsButton = Calculator::findChild<QPushButton *>("equalsButton");
+    connect(equalsButton, SIGNAL(released()), this, SLOT(equalsPressed()));
 }
 
 Calculator::~Calculator()
@@ -47,12 +54,12 @@ Calculator::~Calculator()
 
 /*
  * When a number is pressed, we want to add it on to the current
- * number that is being displayed. If the current number is 0, then
- * we just set the display number to the number that is pressed.
+ * number that is being displayed. We also increment the
+ * currNumLen.
  */
 void Calculator::numPressed() {
     // We want to constrain numbers to 16 digits for now
-    if (currValue.length() >= 16) {
+    if (currNumLen >= MAX_NUM_LENGTH) {
         return;
     }
 
@@ -61,23 +68,60 @@ void Calculator::numPressed() {
 
     currValue += newValue;
 
+    // We have added one more digit onto the current number
+    currNumLen += 1;
+
     ui->display->setText(currValue);
 }
 
 /*
- * When the clear button is pressed, set the displayed value to 0.0
+ * When the clear button is pressed, set the displayed value to 0.0.
+ * Also reset the currNumLen to zero
  */
 void Calculator::clearPressed() {
     currValue = "";
+    currNumLen = 0;
 
     ui->display->setText(currValue);
 }
 
 /*
- * When the decimal button is pressed, toggle the afterDecimal indicator
- * variable. The other functions should then handle their respective cases
- * accordingly.
+ * When the decimal button is pressed, add a "." to the current value
  */
 void Calculator::decimalPressed() {
     currValue += ".";
+}
+
+/*
+ * When the operator buttons are pressed, add them to the current value
+ * that is being displayed, with the necessary spaces. Also set the
+ * currNumLen to zero, as we are no longer building up a number.
+ */
+void Calculator::operatorPressed() {
+    QPushButton *button = (QPushButton *) sender();
+    QString op = button->text();
+
+    currValue += " " + op + " ";
+    currNumLen = 0;
+
+    ui->display->setText(currValue);
+}
+
+/*
+ * When the equals button is pressed, we want to evaluate the current
+ * expression and set the displayed text to this value.
+ */
+void Calculator::equalsPressed() {
+    double result = evaluateExpression(currValue);
+
+    // Set the displayed text to the result, constrained to 16 digits
+    ui->display->setText(QString::number(result, 'g', 16));
+}
+
+/*
+ * TODO
+ */
+double Calculator::evaluateExpression(QString expression) {
+    (void) expression;
+    return 0.0;
 }

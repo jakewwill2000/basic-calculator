@@ -18,11 +18,14 @@ public:
 
 private:
     Ui::Calculator *ui;
+    double evaluateExpression(QString expression);
 
 
 private slots:
     void numPressed();
     void clearPressed();
     void decimalPressed();
+    void operatorPressed();
+    void equalsPressed();
 };
 #endif // CALCULATOR_H
