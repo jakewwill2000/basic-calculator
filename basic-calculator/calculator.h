@@ -15,10 +15,10 @@ class Calculator : public QMainWindow
 public:
     Calculator(QWidget *parent = nullptr);
     ~Calculator();
+    static double evaluateExpression(QString expression);
 
 private:
     Ui::Calculator *ui;
-    double evaluateExpression(QString expression);
 
 
 private slots:
