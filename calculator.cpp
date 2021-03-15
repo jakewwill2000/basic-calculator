@@ -4,6 +4,9 @@
 // Used to represent the current value being displayed
 QString currValue = "";
 
+// Used to denote whether we have a balanced parentheses expression
+size_t parensCount = 0;
+
 // We use these values to constrain the maximum length of a number
 const size_t MAX_NUM_LENGTH = 16;
 size_t currNumLen = 0;
@@ -45,6 +48,14 @@ Calculator::Calculator(QWidget *parent)
     // Connect the equal button to the equalsPressed() slot
     QPushButton *equalsButton = Calculator::findChild<QPushButton *>("equalsButton");
     connect(equalsButton, SIGNAL(released()), this, SLOT(equalsPressed()));
+
+    // Connect the parentheses buttons to the parensPressed() slot
+    QString parenNames[2] = {"parenOpenButton", "parenClosedButton"};
+
+    for (QString name: parenNames) {
+        QPushButton *newButton = Calculator::findChild<QPushButton *>(name);
+        connect(newButton, SIGNAL(released()), this, SLOT(parenPressed()));
+    }
 }
 
 Calculator::~Calculator()
@@ -101,6 +112,17 @@ void Calculator::operatorPressed() {
     QPushButton *button = (QPushButton *) sender();
     QString op = button->text();
 
+    // We don't want to allow two operators to be placed in succession. This
+    // will prevent expressions like 1 ++ 3 from occuring. The operator will
+    // always be the second to last character in the current expression, so
+    // we just verify that this character is not an operator before proceeding.
+    QChar lastChar = currValue[currValue.length() - 2];
+    QChar operators[] = {'+', '-', 'x', '/'};
+
+    if (std::find(std::begin(operators), std::end(operators), lastChar) != std::end(operators)) {
+        return;
+    }
+
     currValue += " " + op + " ";
     currNumLen = 0;
 
@@ -116,6 +138,31 @@ void Calculator::equalsPressed() {
 
     // Set the displayed text to the result, constrained to 16 digits
     ui->display->setText(QString::number(result, 'g', 16));
+}
+
+/*
+ * When a parentheses button is pressed, we want to add the relevent
+ * parentheses onto our current expression. If adding the parentheses
+ * will make the expression invalid, then we return immediately.
+ */
+void Calculator::parenPressed() {
+    QPushButton *button = (QPushButton *) sender();
+    QString paren = button->text();
+
+    // We don't want to permit an unbalanced expression
+    if (paren == ")" && parensCount == 0) {
+        return;
+    }
+
+    // Update the parentheses count depending on which type it is
+    if (paren == "(") {
+        parensCount += 1;
+    } else if (paren == ")") {
+        parensCount -= 1;
+    }
+
+    currValue += paren;
+    ui->display->setText(currValue);
 }
 
 /*
