@@ -74,6 +74,11 @@ void Calculator::numPressed() {
         return;
     }
 
+    // We don't want to allow a number immediately after a closing parentheses
+    if (currValue.length() > 1 && currValue[currValue.length() - 1] == ')') {
+        return;
+    }
+
     QPushButton *button = (QPushButton *) sender();
     QString newValue = button->text();
 
