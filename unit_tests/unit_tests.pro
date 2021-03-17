@@ -16,8 +16,6 @@ TEMPLATE = app
 # but will dramatically increase build times for larger projects.
 
 SOURCES +=  tst_testformulaevaluation.cpp \
-            ../basic-calculator/calculator.cpp
+            ../basic-calculator/parser.cpp
 
-HEADERS += ../basic-calculator/calculator.h
-
-FORMS += ../basic-calculator/calculator.ui
+HEADERS += ../basic-calculator/parser.h
