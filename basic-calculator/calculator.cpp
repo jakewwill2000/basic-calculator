@@ -109,21 +109,63 @@ void Calculator::decimalPressed() {
  * currNumLen to zero, as we are no longer building up a number.
  */
 void Calculator::operatorPressed() {
+    // An operator can never immediately follow a parentheses
+    if (currValue.length() > 1 &&
+            currValue[currValue.length() - 1] == '(') {
+        return;
+    }
     QPushButton *button = (QPushButton *) sender();
     QString op = button->text();
 
-    // We don't want to allow two operators to be placed in succession. This
-    // will prevent expressions like 1 ++ 3 from occuring. The operator will
-    // always be the second to last character in the current expression, so
-    // we just verify that this character is not an operator before proceeding.
-    QChar lastChar = currValue[currValue.length() - 2];
-    QChar operators[] = {'+', '-', 'x', '/'};
+    if (op == '-') {
+        // We allow two negative operators in a row (e.g. 1 - -2), but not three.
+        // The only way this could occur is if the last character of the current
+        // value is a '-'.
+        if (currValue.length() > 1 && currValue[currValue.length() - 1] == '-') {
+            return;
+        }
 
-    if (std::find(std::begin(operators), std::end(operators), lastChar) != std::end(operators)) {
-        return;
+        if (currValue.length() > 1) {
+            // If the last button pressed was '-', we need to adjust the spacing
+            // of this next '-' in order to make it look good. For example, it
+            // should look something like 1 - -2 instead of 1 - - 2.
+            QChar lastChar = currValue[currValue.length() - 2];
+            QChar operators[] = {'+', '-', 'x', '/'};
+
+            if (std::find(std::begin(operators), std::end(operators), lastChar) != std::end(operators) &&
+                    currValue[currValue.length() - 1] == ' ') {
+                currValue += op;
+            } else {
+                currValue += " " + op + " ";
+            }
+        } else {
+            currValue += op + " ";
+        }
+    } else {
+        // If this operator is the first character, it can only be a '-'
+        // to denote a negative number. All other operators are invalid.
+        if (currValue.length() == 0) {
+            return;
+        }
+
+        // We don't want to allow two operators to be placed in succession. This
+        // will prevent expressions like 1 ++ 3 from occuring.
+        else if (currValue.length() > 1) {
+            QChar lastChar = currValue[currValue.length() - 2];
+            QChar operators[] = {'+', '-', 'x', '/'};
+
+            // If the second to last character is an operator and the last character is
+            // a space, then we can't add this operator and just return.
+            if (std::find(std::begin(operators), std::end(operators), lastChar) != std::end(operators) &&
+                    currValue[currValue.length() - 1] == ' ') {
+                return;
+            }
+        }
+
+        currValue += " " + op + " ";
     }
 
-    currValue += " " + op + " ";
+    // We are no longer building up a number, so reset this value
     currNumLen = 0;
 
     ui->display->setText(currValue);
