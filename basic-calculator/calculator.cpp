@@ -11,6 +11,7 @@ size_t parensCount = 0;
 // We use these values to constrain the maximum length of a number
 const size_t MAX_NUM_LENGTH = 16;
 size_t currNumLen = 0;
+bool currNumHasDecimal = false;
 
 Calculator::Calculator(QWidget *parent)
     : QMainWindow(parent)
@@ -18,8 +19,8 @@ Calculator::Calculator(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Initially set the display value to 0.0
-    ui->display->setText(QString::number(0.0));
+    // Initially set the display value to the currentValue
+    ui->display->setText(currValue);
 
     // Connect all of the numeric buttons to the numPressed() slot
     QPushButton *numButtons[10];
@@ -98,6 +99,7 @@ void Calculator::numPressed() {
 void Calculator::clearPressed() {
     currValue = "";
     currNumLen = 0;
+    currNumHasDecimal = false;
 
     ui->display->setText(currValue);
 }
@@ -106,7 +108,20 @@ void Calculator::clearPressed() {
  * When the decimal button is pressed, add a "." to the current value
  */
 void Calculator::decimalPressed() {
+    // A decimal can only follow a number
+    QChar last = currValue[currValue.length() - 1];
+    if (last.isDigit() == false) {
+        return;
+    }
+
+    // A number can't have more than once decimal
+    if (currNumHasDecimal == true) {
+        return;
+    }
+
     currValue += ".";
+    currNumHasDecimal = true;
+    ui->display->setText(currValue);
 }
 
 /*
@@ -136,7 +151,6 @@ void Calculator::operatorPressed() {
             // of this next '-' in order to make it look good. For example, it
             // should look something like 1 - -2 instead of 1 - - 2.
             QChar lastChar = currValue[currValue.length() - 2];
-            QChar operators[] = {'+', '-', 'x', '/'};
 
             if (Calculator::isOperator(lastChar) && currValue[currValue.length() - 1] == ' ') {
                 currValue += op;
@@ -170,6 +184,7 @@ void Calculator::operatorPressed() {
 
     // We are no longer building up a number, so reset this value
     currNumLen = 0;
+    currNumHasDecimal = false;
 
     ui->display->setText(currValue);
 }
@@ -204,7 +219,14 @@ void Calculator::parenPressed() {
     }
 
     // We don't want to permit an unbalanced expression
-    if (paren == ")" && parensCount == 0) {
+    if (paren == ')' && parensCount == 0) {
+        return;
+    }
+
+    // The only characters that can preceed a closing parentheses are a
+    // number or another closing parentheses.
+    QChar last = currValue[currValue.length() - 1];
+    if (paren == ')' && (last.isDigit() == false && last != ')')) {
         return;
     }
 
