@@ -22,11 +22,15 @@ private slots:
     void testMultiOperatorDivision();
     void testMixedOperatorExpressions();
     void testSimpleParentheses();
+    void testOnlyParentheses();
     void testComplexParentheses();
     void testNegativeNumbersNoParentheses();
     void testNegativeNumbersWithParentheses();
     void testMultiplyNegativeNumbersNoParentheses();
     void testMultiplyNegativeNumbersWithParentheses();
+    void testSimpleNestedParentheses();
+    void testNestedParenthesesMultiOperator();
+    void testNestedParenthesesNegativeNumbers();
 };
 
 TestFormulaEvaluation::TestFormulaEvaluation()
@@ -119,6 +123,14 @@ void TestFormulaEvaluation::testSimpleParentheses()
     QVERIFY(result == 2);
 }
 
+void TestFormulaEvaluation::testOnlyParentheses()
+{
+    QString formula = "(1)";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 1);
+}
+
 void TestFormulaEvaluation::testComplexParentheses()
 {
     QString formula = "1 x 2.4 / (3.2 - 2) - 2 + 5.5 + 2.3 x (3 - 2)";
@@ -157,6 +169,30 @@ void TestFormulaEvaluation::testMultiplyNegativeNumbersWithParentheses()
     Parser parser = Parser(formula);
     double result = parser.evaluate();
     QVERIFY(result == 48);
+}
+
+void TestFormulaEvaluation::testSimpleNestedParentheses()
+{
+    QString formula = "1 + (2 + (1 + 2))";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 6);
+}
+
+void TestFormulaEvaluation::testNestedParenthesesMultiOperator()
+{
+    QString formula = "1 + 2 - 3 x (1 - 2 - (3 x 4 / 2 - 1))";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 21);
+}
+
+void TestFormulaEvaluation::testNestedParenthesesNegativeNumbers()
+{
+    QString formula = "1 - -2 + -3 x (-2 + 4 - -2 / (-2 + 2 + 4))";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == -4.5);
 }
 
 QTEST_APPLESS_MAIN(TestFormulaEvaluation)
