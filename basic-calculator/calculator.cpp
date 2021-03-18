@@ -200,6 +200,7 @@ void Calculator::equalsPressed() {
     result = parser.evaluate();
 
     // Set the displayed text to the result, constrained to 16 digits
+    currValue = QString::number(result);
     ui->display->setText(QString::number(result, 'g', 16));
 }
 
