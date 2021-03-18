@@ -23,14 +23,10 @@ private slots:
     void testMixedOperatorExpressions();
     void testSimpleParentheses();
     void testComplexParentheses();
-    void testParenthesesNoOperator();
-    void testParenthesesMixNoOperator();
-    void testParenthesesNoOperatorFollows();
     void testNegativeNumbersNoParentheses();
     void testNegativeNumbersWithParentheses();
     void testMultiplyNegativeNumbersNoParentheses();
     void testMultiplyNegativeNumbersWithParentheses();
-    void testMultiplyNegativeNumbersWithParenthesesAndOperators();
 };
 
 TestFormulaEvaluation::TestFormulaEvaluation()
@@ -131,30 +127,6 @@ void TestFormulaEvaluation::testComplexParentheses()
     QVERIFY(result == 7.8);
 }
 
-void TestFormulaEvaluation::testParenthesesNoOperator()
-{
-    QString formula = "3 (4) (6)";
-    Parser parser = Parser(formula);
-    double result = parser.evaluate();
-    QVERIFY(result == 72);
-}
-
-void TestFormulaEvaluation::testParenthesesMixNoOperator()
-{
-    QString formula = "3 (4) (6) - 3 x 3 - (4 - 2)";
-    Parser parser = Parser(formula);
-    double result = parser.evaluate();
-    QVERIFY(result == 61);
-}
-
-void TestFormulaEvaluation::testParenthesesNoOperatorFollows()
-{
-    QString formula = "(3 - 6) 2";
-    Parser parser = Parser(formula);
-    double result = parser.evaluate();
-    QVERIFY(result == -6);
-}
-
 void TestFormulaEvaluation::testNegativeNumbersNoParentheses()
 {
     QString formula = "3 + -2 x 8 - 6 / 3";
@@ -165,15 +137,15 @@ void TestFormulaEvaluation::testNegativeNumbersNoParentheses()
 
 void TestFormulaEvaluation::testNegativeNumbersWithParentheses()
 {
-    QString formula = "3 + -2 (-3 + 3 - 4)";
+    QString formula = "3 + -2 x (-3 + 3 - 4)";
     Parser parser = Parser(formula);
     double result = parser.evaluate();
-    QVERIFY(result == -11);
+    QVERIFY(result == 11);
 }
 
 void TestFormulaEvaluation::testMultiplyNegativeNumbersNoParentheses()
 {
-    QString formula = "-2 x -3 x - 1.5";
+    QString formula = "-2 x -3 x -1.5";
     Parser parser = Parser(formula);
     double result = parser.evaluate();
     QVERIFY(result == -9);
@@ -181,15 +153,7 @@ void TestFormulaEvaluation::testMultiplyNegativeNumbersNoParentheses()
 
 void TestFormulaEvaluation::testMultiplyNegativeNumbersWithParentheses()
 {
-    QString formula = "(-2) (-8) (3)";
-    Parser parser = Parser(formula);
-    double result = parser.evaluate();
-    QVERIFY(result == 48);
-}
-
-void TestFormulaEvaluation::testMultiplyNegativeNumbersWithParenthesesAndOperators()
-{
-    QString formula = "(-2) (-8) x (3)";
+    QString formula = "(-2) x (-8) x (3)";
     Parser parser = Parser(formula);
     double result = parser.evaluate();
     QVERIFY(result == 48);

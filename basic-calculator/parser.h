@@ -17,6 +17,8 @@ public:
     double currentValue;
     Parser(QString expression);
     double evaluate();
+private:
+    double applyOp(double num1, double num2, QChar op);
 };
 
 #endif // PARSER_H

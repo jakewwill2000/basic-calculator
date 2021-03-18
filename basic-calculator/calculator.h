@@ -19,6 +19,7 @@ public:
 
 private:
     Ui::Calculator *ui;
+    bool isOperator(QChar c);
 
 
 private slots:

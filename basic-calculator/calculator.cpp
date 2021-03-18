@@ -1,3 +1,4 @@
+#include "parser.h"
 #include "calculator.h"
 #include "ui_calculator.h"
 
@@ -137,8 +138,7 @@ void Calculator::operatorPressed() {
             QChar lastChar = currValue[currValue.length() - 2];
             QChar operators[] = {'+', '-', 'x', '/'};
 
-            if (std::find(std::begin(operators), std::end(operators), lastChar) != std::end(operators) &&
-                    currValue[currValue.length() - 1] == ' ') {
+            if (Calculator::isOperator(lastChar) && currValue[currValue.length() - 1] == ' ') {
                 currValue += op;
             } else {
                 currValue += " " + op + " ";
@@ -157,12 +157,10 @@ void Calculator::operatorPressed() {
         // will prevent expressions like 1 ++ 3 from occuring.
         else if (currValue.length() > 1) {
             QChar lastChar = currValue[currValue.length() - 2];
-            QChar operators[] = {'+', '-', 'x', '/'};
 
             // If the second to last character is an operator and the last character is
             // a space, then we can't add this operator and just return.
-            if (std::find(std::begin(operators), std::end(operators), lastChar) != std::end(operators) &&
-                    currValue[currValue.length() - 1] == ' ') {
+            if (Calculator::isOperator(lastChar) && currValue[currValue.length() - 1] == ' ') {
                 return;
             }
         }
@@ -181,7 +179,10 @@ void Calculator::operatorPressed() {
  * expression and set the displayed text to this value.
  */
 void Calculator::equalsPressed() {
-    double result = evaluateExpression(currValue);
+    double result = 0.0;
+
+    Parser parser = Parser(currValue);
+    result = parser.evaluate();
 
     // Set the displayed text to the result, constrained to 16 digits
     ui->display->setText(QString::number(result, 'g', 16));
@@ -195,6 +196,12 @@ void Calculator::equalsPressed() {
 void Calculator::parenPressed() {
     QPushButton *button = (QPushButton *) sender();
     QString paren = button->text();
+
+    // Only allow an opening parentheses if it follows an operator
+    if (paren == '(' && currValue.length() > 1 &&
+            Calculator::isOperator(currValue[currValue.length() - 2]) == false) {
+        return;
+    }
 
     // We don't want to permit an unbalanced expression
     if (paren == ")" && parensCount == 0) {
@@ -213,9 +220,14 @@ void Calculator::parenPressed() {
 }
 
 /*
- * TODO
+ * Take in a character and return true only if it is an operator
  */
-double Calculator::evaluateExpression(QString expression) {
-    (void) expression;
-    return -6.0;
+bool Calculator::isOperator(QChar c) {
+    QChar operators[] = {'+', '-', 'x', '/'};
+
+    if (std::find(std::begin(operators), std::end(operators), c) != std::end(operators)) {
+        return true;
+    }
+
+    return false;
 }
