@@ -1,8 +1,6 @@
 #include <QtTest>
 #include "../basic-calculator/parser.h"
 
-// add necessary includes here
-
 class TestFormulaEvaluation : public QObject
 {
     Q_OBJECT
@@ -12,9 +10,15 @@ public:
     ~TestFormulaEvaluation();
 
 private slots:
+    void testSingleNumber();
+    void testSingleNegativeNumber();
     void testSimpleAddition();
+    void testComplexAddition();
     void testSimpleSubtraction();
+    void testComplexSubtraction();
     void testSimpleMultiplication();
+    void testComplexMultiplication();
+    void testComplexDivision();
     void testSimpleDivision();
     void testMultiOperatorAddition();
     void testMultiOperatorSubtraction();
@@ -31,6 +35,8 @@ private slots:
     void testSimpleNestedParentheses();
     void testNestedParenthesesMultiOperator();
     void testNestedParenthesesNegativeNumbers();
+    void testConsecutiveSequenceSum();
+    void testDeepParentheses();
 };
 
 TestFormulaEvaluation::TestFormulaEvaluation()
@@ -43,12 +49,35 @@ TestFormulaEvaluation::~TestFormulaEvaluation()
 
 }
 
+void TestFormulaEvaluation::testSingleNumber() {
+    QString formula = "1";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 1);
+}
+
+void TestFormulaEvaluation::testSingleNegativeNumber()
+{
+    QString formula = "-1";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == -1);
+}
+
 void TestFormulaEvaluation::testSimpleAddition()
 {
     QString formula = "1 + 2";
     Parser parser = Parser(formula);
     double result = parser.evaluate();
     QVERIFY(result == 3.0);
+}
+
+void TestFormulaEvaluation::testComplexAddition()
+{
+    QString formula = "1 + 3 + 1.2 + 12 + 9 + 10 + 101923.6372";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 101959.8372);
 }
 
 void TestFormulaEvaluation::testSimpleSubtraction()
@@ -59,6 +88,14 @@ void TestFormulaEvaluation::testSimpleSubtraction()
     QVERIFY(result == -1.0);
 }
 
+void TestFormulaEvaluation::testComplexSubtraction()
+{
+    QString formula = "1 - 10 - 11 - 12.3 - 1253.2 - 3.1415 - 3";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == -1291.6415);
+}
+
 void TestFormulaEvaluation::testSimpleMultiplication()
 {
     QString formula = "1 x 2";
@@ -67,12 +104,28 @@ void TestFormulaEvaluation::testSimpleMultiplication()
     QVERIFY(result == 2.0);
 }
 
+void TestFormulaEvaluation::testComplexMultiplication()
+{
+    QString formula = "1 x 2 x 3.3 x 3.4 x 121.33";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 2722.6452);
+}
+
 void TestFormulaEvaluation::testSimpleDivision()
 {
     QString formula = "9 / 3";
     Parser parser = Parser(formula);
     double result = parser.evaluate();
     QVERIFY(result == 3.0);
+}
+
+void TestFormulaEvaluation::testComplexDivision()
+{
+    QString formula = "1024 / 2 / 4 / 8 / 16 / 5 / 5";
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 0.04);
 }
 
 void TestFormulaEvaluation::testMultiOperatorAddition()
@@ -193,6 +246,40 @@ void TestFormulaEvaluation::testNestedParenthesesNegativeNumbers()
     Parser parser = Parser(formula);
     double result = parser.evaluate();
     QVERIFY(result == -4.5);
+}
+
+void TestFormulaEvaluation::testConsecutiveSequenceSum()
+{
+    QString formula = "";
+
+    for (size_t i = 0; i < 1000; i++) {
+        formula += QString::number(i) + " + ";
+    }
+
+    formula += "1000";
+
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == 500500);
+}
+
+void TestFormulaEvaluation::testDeepParentheses()
+{
+    QString formula = "";
+
+    for (size_t i = 0; i < 1000; i++) {
+        formula += '(';
+    }
+
+    formula += "1 + 2 - 3 - 4 x 5 / 2";
+
+    for (size_t i = 0; i < 1000; i++) {
+        formula += ')';
+    }
+
+    Parser parser = Parser(formula);
+    double result = parser.evaluate();
+    QVERIFY(result == -10);
 }
 
 QTEST_APPLESS_MAIN(TestFormulaEvaluation)
