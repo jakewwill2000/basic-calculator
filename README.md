@@ -9,4 +9,4 @@ qmake
 make
 ```
 
-This will create a basic-calculator.app file which can be opened as a standalone application.
+This will create a basic-calculator.app file which can be opened as a standalone application. Alternatively, I include a basic-calculator.app file in the dist/ directory. I cannot guarantee that this executable is built with the latest version of the source code in this repository, but it provides an easy way to quickly check out this project.
